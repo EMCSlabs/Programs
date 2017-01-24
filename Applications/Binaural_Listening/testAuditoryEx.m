@@ -15,7 +15,7 @@ clear;close all;clc
 [sig1 sig2] = matchLen(sig1,sig2);
 
 % assign parameters
-delay_p = 0; % assign delay in percent
+delay_p = 100; % assign delay in percent
 delay = floor(length(sig1)*delay_p/100); % calculate delay in samples
 amp = [1 1]; 
 % run soundDelay
@@ -31,7 +31,7 @@ clear;close all;clc
 [sig2,sr2] = audioread('a2.wav');
 
 % assign parameters
-amp = [3 0.2]; 
+amp = [1 0.2]; 
 
 % run soundBi
 [S] = soundBi(sig1,sig2,amp);
