@@ -44,7 +44,7 @@ S.fh = figure('units','pixels',...  % figure shape
     'position',[400 300 700 500],...
     'numbertitle','off',...
     'menubar','none',...
-    'name','Real time FFT analyzer',...
+    'name','Real-time FFT',...
     'renderer', 'painters',...
     'resize','off');
 S.ax = axes('units','pixels',...    % plotting axes
@@ -120,7 +120,6 @@ set(S.pb_stop,'callback',{@pb_stop})
 %-- axes setting
     function set_axes(varargin)
         % this function set axes before plotting
-        S.amplitudeAxis = (0:S.fftLength/2)/S.fftLength*S.srate; % y-axis frequency range
         S.freqAxis = linspace(0,floor(S.srate/2),S.fftLength/2); % x-axis frequency range in Hz
         S.freqAxisInSample = length(S.freqAxis); % number of x-axis frequencies
         S.initialFFTydata = zeros(1,length(S.freqAxis)); % number of x-axis time samples
@@ -187,7 +186,6 @@ set(S.pb_stop,'callback',{@pb_stop})
         
         yData = tmpSpectrum(1:floor(length(tmpSpectrum)/2)); % only half of the spectrum (symmetry)
         set(S.fftHandle,'ydata',yData)
-        drawnow
         
         S.frameCount = S.frameCount+1;
         set(S.tx,'string',sprintf('numFrame = %d',S.frameCount))

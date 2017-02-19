@@ -44,7 +44,7 @@ S.fh = figure('units','pixels',...  % figure shape
     'position',[400 300 700 500],...
     'numbertitle','off',...
     'menubar','none',...
-    'name','Real time wave analyzer',...
+    'name','Real-time Waveform',...
     'renderer', 'painters',...
     'resize','off');
 S.ax = axes('units','pixels',...    % plotting axes
@@ -108,10 +108,7 @@ set(S.pb_stop,'callback',{@pb_stop})
         S.higherFreqLimit = 3600;
         S.frameShift = 1/S.srate; % around 0.00002 sec
         S.lastPosition = 1;
-        S.frameShiftInSample = round(S.frameShift*S.srate); % e.g. 0.00002*44100=>1
         S.frameCount = 0;
-        S.currentPoint = 1; % for tmpAudio
-        S.endPoint = 0; % for tmpAudio
     end
 
 %-- axes setting
@@ -181,7 +178,6 @@ set(S.pb_stop,'callback',{@pb_stop})
             ydata = tmpAudio(end-S.timeAxisInSample+1:end);
         end
         set(S.waveHandle,'ydata',fliplr(ydata)) % ydata should be left-right switched 
-        drawnow
         
         S.frameCount = S.frameCount+1;
         set(S.tx,'string',sprintf('Frame rate = %d',S.frameCount))
