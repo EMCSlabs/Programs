@@ -1,7 +1,0 @@
-mode=inverse
-hidden_layer=[200]
-learning_rate=0.001
-max_epoch=20
-batch_size=10
-beg_time=Tue Feb 28 12:56:06 2017
-end_time=Tue Feb 28 12:59:44 2017

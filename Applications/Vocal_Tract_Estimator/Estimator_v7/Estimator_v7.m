@@ -64,7 +64,7 @@ S.tx = uicontrol('style','text',... % text box
     'fontsize',15);
 S.pulldown = uicontrol('style','popupmenu',... % drop-down menu
     'position',[150 30 150 50],...
-    'string',{'HJ_ANN','HJ_LSTM','TF_ANN','TF_LSTM','MATLAB_ANN'},...
+    'string',{'ANN','LSTM','MATLAB_ANN'},...
     'value',1,...
     'callback',{@load_model});
 S.tx_pulldown = uicontrol('style','text',...
@@ -223,27 +223,39 @@ set(S.pulldown,'callback',{@load_model})
         idx = get(S.pulldown,'value');
         selected = sels{idx}; % get pull-down menu selection
         switch selected
-            case 'HJ_ANN'
-                S.model_dir = './model_HJ_ANN/Test_AC_AR/models.mat';
-            case 'HJ_LSTM'
-                S.model_dir = './model_HJ_LSTM/Test_AC_AR/models.mat';
-            case 'TF_ANN'
-                S.model_dir = './model_TF_ANN/Test_AC_AR/models.mat';
-            case 'TF_LSTM'
-                S.model_dir = './model_TF_LSTM/Test_AC_AR/models.mat';
+            case 'ANN'
+                S.model_dir = './models/ANN';
+                S.frameCount = 0;
+            case 'LSTM'
+                S.model_dir = './models/LSTM';
+                S.frameCount = 0;
+                addpath(S.model_dir)
             case 'MATLAB_ANN'
-                S.model_dir = './model_MATLAB_ANN';
+                S.model_dir = './models/MATLAB_ANN';
+                S.frameCount = 0;
                 addpath(S.model_dir)
         end
         try 
-            if ~strcmp(selected,'MATLAB_ANN')
-                L = load(S.model_dir);
+            if strcmp(selected,'ANN') || strcmp(selected,'LSTM')
+                L = load(fullfile(S.model_dir,'models.mat'));
                 S.model = getfield(L, 'models');
                 set(S.tx_pulldown,'string','Model loaded')
+                set(S.pb_start,'enable','on')
+            elseif strcmp(selected,'LSTM')
+                if ~exist('forward_LSTM.m')
+                    error('forward_LSTM.m does not exist')
+                end
+            elseif strcmp(selected, 'MATLAB_ANN')
+                if ~exist('forward_ANN.m')
+                    error('forward_ANN.m does not exist')
+                else
+                    set(S.pb_start,'enable','on')
+                end
             end
         catch
             set(S.tx_pulldown,'string','Model Not loaded')
-            error('Check your model directory\nError at %s',S.model_dir)
+            warning('Check your model directory\nError at %s',S.model_dir)
+            set(S.pb_start,'enable','off')
         end
         set(S.fh,'UserData',S) % update S in UserData!
     end
@@ -324,7 +336,7 @@ set(S.pulldown,'callback',{@load_model})
             S.lastPosition = currentIndex;
         end
         mfcc = get_mfcc(x, S.srate);
-        pred = forward(S, mfcc)';
+        pred = forward(mfcc); % (example x feature)
         
         tmpSgram = S.fftBuffer(:,1:nFrames);
         if S.maxLevel < max(tmpSgram(:))
@@ -398,44 +410,44 @@ set(S.pulldown,'callback',{@load_model})
     end
 
 %-- Forward calculation
-    function pred = forward(S, xdata)
+    function pred = forward(xdata)
         % xdata: (feature x examples)
         sels = get(S.pulldown,'string');
         idx = get(S.pulldown,'value');
         selected = sels{idx}; % get pull-down menu selection
+        sigmoid = @(a,x) 1./(1 + exp(a*x));
         switch selected
-            case 'HJ_ANN'
+            case 'ANN'
                 biasMatrix_H = S.model.biasMatrix_H;
                 biasMatrix_O = S.model.biasMatrix_O;
                 weightMatrix_IH = S.model.weightMatrix_IH;
                 weightMatrix_HO = S.model.weightMatrix_HO;
-                hidden_Activation = xdata'*weightMatrix_IH + repmat(biasMatrix_H,size(xdata,2),1);
-                output_Activation = S.sigmoid(1,hidden_Activation)*weightMatrix_HO + repmat(biasMatrix_O,size(hidden_Activation,1),1);
-                pred = output_Activation'; % (example x feature)
-            case 'HJ_LSTM'
-                
-            case 'TF_ANN'
-                input_mu = S.model.acous_mu;
-                input_sd = S.model.acous_std;
-                output_mu = S.model.art_mu;
-                output_sd = S.model.art_std;
-                weight_h1 = S.model.weight_h1;
-%                 weight_h2 = S.model.weight_h2;
-                weight_out = S.model.weight_out;
-                bias_h1 = S.model.bias_h1;
-%                 bias_h2 = S.model.bias_h2;
-                bias_out = S.model.bias_out;
-                
-                input_norm = (xdata' - repmat(input_mu,size(xdata,2),1))./repmat(input_sd,size(xdata,2),1);
-                hidden_act1 = tanh(input_norm*weight_h1 + repmat(bias_h1,size(xdata,2),1));
-%                 hidden_act2 = S.relu(hidden_act1*weight_h2 + repmat(bias_h2,size(xdata,2),1));
-                out_act = hidden_act1*weight_out + repmat(bias_out,size(xdata,2),1);
-                pred = (out_act*repmat(output_sd,size(out_act,2),1) + output_mu)'; % (example x feature)
-            case 'TF_LSTM'
-                
+                in_coeff = -0.25;
+                out_coeff = -0.1;
+                input_mani = sigmoid(in_coeff,xdata);
+                hidden_Activation = sigmoid(-1,input_mani'*weightMatrix_IH + repmat(biasMatrix_H,size(xdata,2),1));
+                output_Activation = sigmoid(-1,hidden_Activation*weightMatrix_HO + repmat(biasMatrix_O,size(hidden_Activation,1),1));
+                output_reverse = log(1./output_Activation - 1)/out_coeff;
+                pred = output_reverse;  % (example x feature)
+            case 'LSTM'
+                if S.frameCount < 1
+                   S.hidden_Cell_Memory_List = {''}; 
+                   S.hidden_Activation_List = {''};
+                end
+                pred = zeros(size(xdata,2), 14);
+                for i = 1:size(xdata, 2)
+                    input_Activation = xdata(:,i)';
+                    [pred(i,:), new_Hidden_Cell_Memory, new_Hidden_Activation, ~] =...
+                        forward_LSTM(S.model, S.frameCount,'acoustics', input_Activation, ...
+                        S.hidden_Cell_Memory_List, S.hidden_Activation_List);
+                    S.hidden_Cell_Memory_List = new_Hidden_Cell_Memory;
+                    S.hidden_Activation_List = new_Hidden_Activation;
+                end
+                set(S.fh,'UserData',S) % update S in UserData because of LSTM!
             case 'MATLAB_ANN'
-                pred = ANN_inverse5000(xdata);
+                pred = forward_ANN(xdata)'; % (example x feature)
         end
+        
     end
 end
 
