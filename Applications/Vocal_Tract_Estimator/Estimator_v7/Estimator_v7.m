@@ -96,6 +96,7 @@ S.pb_quit = uicontrol('style','push',...  % quit button
 %------------------------------------------------------------------------%
 % Reminder: variable 'S' will hold all the uicontrols, variables/parameters
 % during the entire process
+addpath('models')
 
 % basic settings
 set_parameters(S);
@@ -199,7 +200,7 @@ set(S.pulldown,'callback',{@load_model})
         S.linearTickLabelListWide = get(S.ax_fft,'ytickLabel');
         
         % articulation
-        try load('meanPalates.mat'), load('meanPharynx.mat');
+        try load('./models/meanPalates.mat'), load('./models/meanPharynx.mat');
         catch error('meanPalates.mat or meanPharynx is not in the path');end
         S.pal = plot(S.ax_art,meanPalates(:,1),meanPalates(:,2),'k-');
         hold(S.ax_art,'on')
