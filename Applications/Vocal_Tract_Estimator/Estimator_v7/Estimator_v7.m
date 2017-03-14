@@ -279,9 +279,11 @@ set(S.pulldown,'callback',{@load_model})
         set(S.pb_stop,'enable','off')
         set(S.pb_start,'enable','on')
         set(S.pb_quit,'enable','on')
+        S.frameCount = 0;
         
         stop(S.timerObj)
         stop(S.recordObj)
+        set(S.fh,'UserData',S) % update S
     end
 
 %-- pushbotton: quit GUI
@@ -436,7 +438,7 @@ set(S.pulldown,'callback',{@load_model})
                 end
                 pred = zeros(size(xdata,2), 14);
                 for i = 1:size(xdata, 2)
-                    input_Activation = xdata(:,i)';
+                    input_Activation = xdata(:,i)'; % 1x39 vector
                     [pred(i,:), new_Hidden_Cell_Memory, new_Hidden_Activation, ~] =...
                         forward_LSTM(S.model, S.frameCount,'acoustics', input_Activation, ...
                         S.hidden_Cell_Memory_List, S.hidden_Activation_List);
