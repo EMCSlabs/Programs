@@ -10,7 +10,8 @@ Media Zen & Korea University (Author: Hyungwon Yang)
 
 ### MacOSX and Linux
 ----------------------------------------------------------------
-Mac OS X (El Capitan 10.11.6): Stable.
+Mac OS X (El Capitan,Sierra 03.21.17): Stable.
+
 Linux (Ubuntu 14.04): Stable.
 
 Bash
@@ -65,8 +66,9 @@ Python 3.5
  -     $ sh forced_align.sh -nw ./example/readspeech
  - Options:
 	 1) -h  | --help    : Showing instruction.
+     2) -s  | --skip    : Skip alignment for already aligned data.
 	 2) -nw | --no-word : Deleting word tier.
-	 3) -np | --no-phone: Deleting phone tier.
+	 4) -np | --no-phone: Deleting phone tier.
 
 4. Textgrid(s) will be saved into data directoy.
 
@@ -77,7 +79,7 @@ Python 3.5
 
 ### CONTRIBUTORS
 ---
-# In order to improve forced alignment performance, all linguistics named below participate in this project.
+# In order to improve forced alignment performance, all contributors named below participate in this project.
 
 # Students
 Hyungwon Yang / hyung8758@gmail.com
@@ -99,5 +101,6 @@ Hosung Nam / hnam@korea.ac.kr
 - v.1.3(10/24/16): Selecting specific labels in TextGrid is available. Procedure of alignment is changed. Audio files collected in the directory will be aligned one by one. Due to this change, alignment takes more time, but its accuracy is increased. Log directory will show the alignment process in detail. More useful information is provided during alignment on the command line. 
 - v.1.4(01.14.16): It will catch more errors. The name of log files will be tagged with respect to each wave file name. 
 - v.1.5(02.08.17): Main g2p was changed and it is now compatible with the new g2p system. Skipping option is added and it will skip alignment of audio files that have TextGrdis. A few minor bugs are fixed.
- - v.1.5.1(02.26.17): bug reports. Time mismatch in the word tier. fixed.
+- v.1.5.1(02.26.17): bug reports. Time mismatch in the word tier. fixed.
+- v.1.5.2(05.17.17): change return to exit, option errors, minor bug fixed. skip option is added.
 

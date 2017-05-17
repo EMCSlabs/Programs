@@ -14,7 +14,6 @@ import sys
 
 # Arguments check.
 if len(sys.argv) != 5:
-    print(len(sys.argv))
     raise ValueError('The number of input arguments is wrong.')
 
 phone_file = sys.argv[1]

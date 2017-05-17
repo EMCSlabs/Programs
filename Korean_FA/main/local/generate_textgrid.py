@@ -34,7 +34,6 @@ word_option = options.no_word
 phone_option = options.no_phone
 
 if len(args) != 4:
-    print(len(args))
     print("Input arguments are incorrectly provided. Four argument should be assigned.")
     print("1. Result file directory.")
     print("2. Word files.")

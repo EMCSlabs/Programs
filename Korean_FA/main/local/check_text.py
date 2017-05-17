@@ -24,7 +24,6 @@ tg_option = options.textgrid_skip
 
 # Arguments check.
 if len(args) is 0 or len(args) > 1:
-    print(len(args))
     print("Input arguments are incorrectly provided. One argument should be assigned.")
     print("1. data directory.")
     print("*** USAGE ***")

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Copyright 2016 Media Zen & 
-#				 Korea University (author: Hyungwon Yang) v1.5
+#				 Korea University (author: Hyungwon Yang) v1.5.2
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 # mac OSX terminal and then run this script. Otherwise this script
 # won't work properly.
 # Do not move the parts of scripts or folders or run the main script
-# from outside of this folder. 
+# from outside of this folder.
 
 # Kaldi directory ./kaldi
 kaldi=/Users/hyungwonyang/kaldi
@@ -75,41 +75,38 @@ bash forced_align.sh [option] [data directory]\n\
 bash forced_align.sh -np example/my_record\n"
 
 if [ $# -gt 3 ] || [ $# -lt 1 ]; then
-   echo -e $usage  && return
+   echo -e $usage  && exit
 fi
 
 arg_num=$#
 while [ $arg_num -gt 0 ] ; do 
   case "$1" in
-    -h) echo -e $usage && return; break ;;
+    -h) echo -e $usage && exit; break ;;
 	-s) tg_skip_opt="--skip"; shift; arg_num=$((arg_num-1)) ;;
     -nw) tg_word_opt="--no-word"; shift; arg_num=$((arg_num-1)) ;;
     -np) tg_phone_opt="--no-phone"; shift; arg_num=$((arg_num-1)) ;;
 
-    --help) echo -e $usage && return; break ;;
+    --help) echo -e $usage && exit; break ;;
 	--skip) tg_skip_opt="--skip"; shift; arg_num=$((arg_num-1)) ;;
     --no-word) tg_word_opt="--no-word"; shift; arg_num=$((arg_num-1)) ;; 
     --no-phone) tg_phone_opt="--no-phone"; shift; arg_num=$((arg_num-1)) ;;
-    -*) echo -e "*** UNKNOWN OPTION: $1 ***\n"$usage ; return ;;
-    --*) echo -e "*** UNKNOWN OPTION: $1 ***\n"$usage ; return ;;
+    -*) echo -e "*** UNKNOWN OPTION: $1 ***\n"$usage ; exit  ;;
+    --*) echo -e "*** UNKNOWN OPTION: $1 ***\n"$usage ; exit ;;
+	*) break ;;
   esac
-  if [ $arg_num -eq 1 ]; then
-  	arg_num=0
-  fi
 done
 
 # Folder directory that contains wav and text files.
 tmp_data_dir=$1
 if [ "$tmp_data_dir" == "" ]; then
-	echo "ERROR: data directory is not provided." && return
+	echo "ERROR: data directory is not provided." && exit
 fi
 
 # Check data_dir
 alias realpath="perl -MCwd -e 'print Cwd::realpath(\$ARGV[0]),qq<\n>'"
 data_dir=`realpath $tmp_data_dir`
-echo "data directory=$data_dir"
 if [ ! -d $data_dir ]; then
-	echo "ERROR: $data_dir is not present. Please check the data directory."  && return
+	echo "ERROR: $data_dir is not present. Please check the data directory."  && exit
 fi
 
 # Remove previous log, tmp, and data directories.
@@ -149,7 +146,7 @@ if [ "$tg_skip_opt" == "--skip" ]; then
 	wav_num=`echo $wav_list | wc -w`
 	txt_num=`echo $txt_list | wc -w`
 	if [ $wav_num -eq 0 ]; then 
-		echo -e "No file is remained to be aligned.\nExit alignment." && return
+		echo -e "No file is remained to be aligned.\nExit alignment." && exit
 	fi
 else
 	wav_list=`ls $data_dir | grep .wav `
@@ -157,7 +154,7 @@ else
 	txt_list=`ls $data_dir | grep .txt `
 	txt_num=`echo $txt_list | tr ' ' '\n' | wc -l`
 	if [ $wav_num -eq 0 ]; then 
-		echo -e "No file is remained to be aligned.\nExit alignment." && return
+		echo -e "No file is remained to be aligned.\nExit alignment." && exit
 	fi
 fi
 
@@ -165,7 +162,7 @@ fi
 if [ $wav_num != $txt_num ]; then
 	echo "ERROR: The number of audio and text files are not matched. Please check the input data." 
 	echo "Audio list: "$wav_list
-	echo "Text  list: "$txt_list && return
+	echo "Text  list: "$txt_list && exit
 fi
 
 echo ===================================================================
@@ -362,10 +359,10 @@ done
 echo "===================== FORCED ALIGNMENT FINISHED  =====================" | tee -a $log_dir/process.$log_name.log
 echo "** Result Information on $(date) **									" | tee -a $log_dir/process.$log_name.log
 echo "Total Trials:" $wav_num									        	  | tee -a $log_dir/process.$log_name.log
-echo "Success     :" $((wav_num-fail_num))									  | tee -a $log_dir/process.$log_name.log
+echo "Success     :" $((wav_num - fail_num))								  | tee -a $log_dir/process.$log_name.log
 echo "Fail        :" $fail_num												  | tee -a $log_dir/process.$log_name.log
 echo "----------------------------------------------------------------------" | tee -a $log_dir/process.$log_name.log
-echo "Result      :" $((wav_num-fail_num)) /$wav_num "(Success / Total)"	  | tee -a $log_dir/process.$log_name.log
+echo "Result      : $((wav_num - fail_num)) / $wav_num (Success / Total)"	  | tee -a $log_dir/process.$log_name.log
 if [ $fail_num -gt 0 ]; then 
 echo "To check the failed results, refer to the ./log directory."; fi
 echo

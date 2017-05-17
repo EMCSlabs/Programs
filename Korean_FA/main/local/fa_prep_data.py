@@ -17,7 +17,6 @@ import wave
 
 # Arguments check.
 if len(sys.argv) != 3:
-    print(len(sys.argv))
     print("Input arguments are incorrectly provided. Two argument should be assigned.")
     print("1. Data directory.")
     print("2. Save directory.")

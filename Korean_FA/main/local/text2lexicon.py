@@ -15,7 +15,6 @@ import math
 
 # Arguments check.
 if len(sys.argv) != 4:
-    print(len(sys.argv))
     print("Input arguments are incorrectly provided. Two argument should be assigned.")
     print("1. Text file name.")
     print("2. g2p file name.")
